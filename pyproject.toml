@@ -1,0 +1,35 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "llm-billing-engine"
+version = "0.1.0"
+description = "Drop-in token credit system for AI SaaS — reserve, settle, audit"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "Alper Nabil Gabra Zakher", email = "contact@alpernabil.com" }]
+keywords = ["ai", "billing", "tokens", "credits", "saas", "llm", "anthropic", "openai", "gemini"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries",
+]
+requires-python = ">=3.10"
+dependencies = ["asyncpg>=0.29.0"]
+
+[project.optional-dependencies]
+fastapi = ["fastapi>=0.100.0"]
+dev = ["pytest>=7", "pytest-asyncio>=0.23", "black", "ruff", "mypy"]
+
+[project.urls]
+Homepage = "https://github.com/AlperNab/llm-billing-engine"
+Repository = "https://github.com/AlperNab/llm-billing-engine"
+Issues = "https://github.com/AlperNab/llm-billing-engine/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/llm_billing"]
