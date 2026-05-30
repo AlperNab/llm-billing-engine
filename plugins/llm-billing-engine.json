@@ -1,0 +1,377 @@
+{
+  "slug": "llm-billing-engine",
+  "name": "Llm Billing Engine",
+  "domain": "Platform / Billing",
+  "target_user": "Domain operator, business owner, analyst, or team member who needs this workflow executed reliably.",
+  "core_job": "LLM usage → metering and billing",
+  "deep_features": [
+    "provider price registry",
+    "token tracking",
+    "user budgets",
+    "cost alerts",
+    "invoice generation",
+    "per-project attribution",
+    "margin calculator",
+    "abuse detection"
+  ],
+  "input_schema": [
+    {
+      "key": "llm_usage",
+      "label": "LLM usage",
+      "type": "text",
+      "required": true,
+      "help": "Affects input: LLM usage.",
+      "affects": [
+        "prompt",
+        "workflow"
+      ],
+      "default": ""
+    },
+    {
+      "key": "work_brief",
+      "label": "Work brief / source text / URL / instructions",
+      "type": "textarea",
+      "required": true,
+      "default": "",
+      "help": "Paste the material, URL, description, or instruction needed for this project.",
+      "affects": [
+        "prompt",
+        "workflow"
+      ]
+    }
+  ],
+  "customization_schema": [
+    {
+      "key": "execution_mode",
+      "label": "Execution mode",
+      "type": "select",
+      "required": false,
+      "options": [
+        "Draft",
+        "Production",
+        "Audit / strict review",
+        "JSON/API output"
+      ],
+      "default": "Production",
+      "help": "Controls strictness, depth, and output format for this project workflow.",
+      "affects": [
+        "workflow",
+        "validation",
+        "export"
+      ]
+    },
+    {
+      "key": "currency",
+      "label": "currency",
+      "type": "select",
+      "required": false,
+      "help": "Affects customization: currency.",
+      "affects": [
+        "prompt",
+        "validation",
+        "workflow",
+        "export"
+      ],
+      "options": [
+        "USD",
+        "EUR",
+        "GBP",
+        "EGP",
+        "AED",
+        "SAR",
+        "USDT"
+      ],
+      "default": "USD"
+    },
+    {
+      "key": "provider_prices",
+      "label": "provider prices",
+      "type": "text",
+      "required": false,
+      "help": "Affects customization: provider prices.",
+      "affects": [
+        "prompt",
+        "validation",
+        "workflow",
+        "export"
+      ],
+      "default": ""
+    },
+    {
+      "key": "markup",
+      "label": "markup",
+      "type": "text",
+      "required": false,
+      "help": "Affects customization: markup.",
+      "affects": [
+        "prompt",
+        "validation",
+        "workflow",
+        "export"
+      ],
+      "default": ""
+    },
+    {
+      "key": "user_plans",
+      "label": "user plans",
+      "type": "text",
+      "required": false,
+      "help": "Affects customization: user plans.",
+      "affects": [
+        "prompt",
+        "validation",
+        "workflow",
+        "export"
+      ],
+      "default": ""
+    },
+    {
+      "key": "quotas",
+      "label": "quotas",
+      "type": "text",
+      "required": false,
+      "help": "Affects customization: quotas.",
+      "affects": [
+        "prompt",
+        "validation",
+        "workflow",
+        "export"
+      ],
+      "default": ""
+    },
+    {
+      "key": "alert_thresholds",
+      "label": "alert thresholds",
+      "type": "slider",
+      "required": false,
+      "help": "Affects customization: alert thresholds.",
+      "affects": [
+        "prompt",
+        "validation",
+        "workflow",
+        "export"
+      ],
+      "min": 0,
+      "max": 100,
+      "default": 50
+    },
+    {
+      "key": "billing_cycle",
+      "label": "billing cycle",
+      "type": "text",
+      "required": false,
+      "help": "Affects customization: billing cycle.",
+      "affects": [
+        "prompt",
+        "validation",
+        "workflow",
+        "export"
+      ],
+      "default": ""
+    },
+    {
+      "key": "output_format",
+      "label": "output format",
+      "type": "select",
+      "required": false,
+      "help": "Affects customization: output format.",
+      "affects": [
+        "prompt",
+        "validation",
+        "workflow",
+        "export"
+      ],
+      "options": [
+        "Markdown",
+        "JSON",
+        "CSV",
+        "PDF",
+        "DOCX",
+        "XLSX"
+      ],
+      "default": "Markdown"
+    },
+    {
+      "key": "language",
+      "label": "language",
+      "type": "select",
+      "required": false,
+      "help": "Affects customization: language.",
+      "affects": [
+        "prompt",
+        "validation",
+        "workflow",
+        "export"
+      ],
+      "options": [
+        "English",
+        "Arabic",
+        "Egyptian Arabic",
+        "French",
+        "German",
+        "Spanish"
+      ],
+      "default": "English"
+    },
+    {
+      "key": "privacy_mode",
+      "label": "privacy mode",
+      "type": "select",
+      "required": false,
+      "help": "Affects customization: privacy mode.",
+      "affects": [
+        "prompt",
+        "validation",
+        "workflow",
+        "export"
+      ],
+      "options": [
+        "cloud allowed",
+        "local only",
+        "redact sensitive data"
+      ],
+      "default": "cloud allowed"
+    },
+    {
+      "key": "confidence_threshold",
+      "label": "Confidence threshold",
+      "type": "slider",
+      "required": false,
+      "min": 0,
+      "max": 100,
+      "default": 75,
+      "help": "Items below this confidence are escalated to the human review queue.",
+      "affects": [
+        "validation",
+        "workflow",
+        "export"
+      ]
+    }
+  ],
+  "workflow_steps": [
+    "LLM usage",
+    "metering and billing"
+  ],
+  "ui_panels": [
+    "usage dashboard",
+    "provider costs",
+    "customer invoices",
+    "budget controls",
+    "alerts"
+  ],
+  "output_formats": [
+    "billing API",
+    "invoices",
+    "usage CSV",
+    "cost analytics"
+  ],
+  "integrations": [
+    "File upload",
+    "REST API",
+    "Export download",
+    "Job history",
+    "Stripe/accounting optional"
+  ],
+  "guardrails": [
+    "Show uncertainty and confidence",
+    "Cite evidence from input when possible",
+    "Human review required for legal, medical, financial, hiring, or security decisions",
+    "Do not invent facts absent from input"
+  ],
+  "recommended_models": {
+    "drafting": "fast cloud or local instruct model",
+    "reasoning": "strong reasoning model",
+    "private_documents": "local model via Ollama/LM Studio/vLLM",
+    "vision_or_pdf": "vision-capable model when image pages are used"
+  },
+  "suite": "Finance Document Suite",
+  "implementation_status": "real_local_engine_registered",
+  "analysis_modules": [
+    "llm_usage_meter",
+    "invoice_calc",
+    "budget_guard"
+  ],
+  "output_sections": [
+    "Usage table",
+    "Cost calculation",
+    "Budget alerts",
+    "Invoice lines"
+  ],
+  "field_validations": [
+    {
+      "field": "currency",
+      "rule": "Normalize currency symbol/code and flag mixed-currency documents."
+    },
+    {
+      "field": "language",
+      "rule": "Preserve requested language in final deliverable unless source text requires bilingual output."
+    }
+  ],
+  "scorecards": [
+    "Input completeness",
+    "Domain fit",
+    "Risk level",
+    "Automation readiness",
+    "Export readiness"
+  ],
+  "automation_hooks": [
+    {
+      "name": "save_job_snapshot",
+      "type": "internal",
+      "description": "Persist inputs, customization, uploads, output, and usage for audit/history."
+    },
+    {
+      "name": "export_pack",
+      "type": "internal",
+      "description": "Export Markdown, JSON, PDF, and DOCX from the completed job."
+    },
+    {
+      "name": "human_review_queue",
+      "type": "manual",
+      "description": "Flag low-confidence, legal/medical/finance/security/compliance-sensitive items for human review."
+    }
+  ],
+  "ux_profile": {
+    "name": "Finance Ops Console",
+    "accent": "#67e8f9",
+    "layout": "Document intake → extraction → validation → approval/export",
+    "hero": "Audit-ready finance workflow with line-item review, validation ledger, exception handling, and export controls.",
+    "components": [
+      "Document intake panel",
+      "Extraction table",
+      "Validation ledger",
+      "Approval checklist",
+      "Export connector cards"
+    ],
+    "metrics": [
+      "Extraction confidence",
+      "Validation issues",
+      "Approval readiness",
+      "Export completeness"
+    ],
+    "quick_actions": [
+      "Validate totals",
+      "Check duplicates",
+      "Prepare accounting export",
+      "Flag human review"
+    ],
+    "review_lanes": [
+      "Capture",
+      "Normalize",
+      "Validate",
+      "Approve",
+      "Export"
+    ],
+    "empty_state": "Upload a finance document or paste source text. The UI will keep live-data sections empty until real files/connectors are provided.",
+    "icon": "💳",
+    "project_slug": "llm-billing-engine",
+    "domain": "Platform / Billing"
+  },
+  "final_gui_status": {
+    "standalone_folder_gui": true,
+    "domain_specific_ux_profile": true,
+    "elegant_component_system": true,
+    "no_fake_live_data_policy": true,
+    "requires_real_connectors_for_external_actions": true
+  }
+}
