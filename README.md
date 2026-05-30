@@ -1,123 +1,464 @@
-# llm-billing-engine
+<div align="center">
 
-> **Drop-in token credit system for AI SaaS** — reserve, settle, audit. Battle-tested in production at [ToScribe](https://toscribe.to).
+# 💳 Llm Billing Engine
 
-[![PyPI](https://img.shields.io/pypi/v/llm-billing-engine?style=flat)](https://pypi.org/project/llm-billing-engine/)
-[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=flat&logo=python)](https://python.org)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-12%2B-316192?style=flat&logo=postgresql)](https://postgresql.org)
+### Audit-ready finance workflow with line-item review, validation ledger, exception handling, and export controls.
 
-Every AI SaaS founder builds the same billing system from scratch. This is the production-grade version — with the hard parts done right.
+![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white) ![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi&logoColor=white) ![SQLite](https://img.shields.io/badge/SQLite-Job_History-003B57?logo=sqlite&logoColor=white) ![Local LLM](https://img.shields.io/badge/Local_LLM-Ollama%20%7C%20LM%20Studio%20%7C%20vLLM-111827) ![Cloud LLM](https://img.shields.io/badge/Cloud_LLM-OpenAI%20%7C%20Anthropic%20%7C%20Gemini%20%7C%20Mistral-7C3AED) ![No Fake Data](https://img.shields.io/badge/Policy-No_Fake_Live_Data-red)
 
-## The hard parts it solves
+**Domain:** `Platform / Billing` · **Suite:** `Finance Document Suite` · **Accent:** `#67e8f9`
 
-| Problem | Naive approach | This library |
-|---------|---------------|--------------|
-| Floating point money | `FLOAT` columns | `DECIMAL(20,8)` everywhere |
-| Double-spend under load | No locking | Row-level `SELECT FOR UPDATE` |
-| Charge before confirming usage | Post-deduct | Reserve → use → settle pattern |
-| No audit trail | Mutable balance | Immutable ledger, balance is computed |
-| Concurrent requests | Race conditions | Idempotency keys |
+[🚀 Quick Start](#-quick-start) · [✨ Features](#-features) · [🎛️ Customization](#️-customization) · [🧠 LLM Providers](#-llm-providers) · [🧪 Testing](#-testing) · [🧯 Troubleshooting](#-troubleshooting)
 
-## Quickstart
+</div>
+
+---
+
+## 🧭 What This Project Does
+
+**Llm Billing Engine** is a standalone, browser-based AI workflow app for **Platform / Billing**. It turns structured inputs, uploaded files, and project-specific settings into reviewable outputs using a deterministic local engine plus optional local/cloud LLM enhancement.
+
+**Core job:** LLM usage → metering and billing.
+
+**Designed for:** Domain operator, business owner, analyst, or team member who needs this workflow executed reliably.
+
+**Why use it:**
+
+- 🧩 **Standalone project folder:** run this project by itself without depending on a central dashboard.
+- 🖥️ **Elegant GUI:** includes project-specific panels, structured forms, upload handling, output preview, and exports.
+- 🧠 **Model-flexible:** choose local models for privacy or cloud models for stronger reasoning.
+- 🧾 **Auditable:** every run is stored in SQLite with inputs, settings, result, and export history.
+- 🚫 **No fake live data:** external systems are only used when real API keys/connectors are configured.
+- 🛡️ **Human review gates:** sensitive legal, medical, hiring, finance, or security outputs are flagged for review.
+
+---
+
+## ✨ Features
+
+- provider price registry
+- token tracking
+- user budgets
+- cost alerts
+- invoice generation
+- per-project attribution
+- margin calculator
+- abuse detection
+
+### 🧱 Built-In Platform Capabilities
+
+- ⚡ **FastAPI backend** with documented JSON endpoints.
+- 🎨 **Responsive web UI** with dark, polished SaaS-style layout.
+- 📁 **File upload and text extraction** for common document/code formats.
+- 🗂️ **Job history** saved locally in `data/*.sqlite3`.
+- 🔐 **Encrypted provider settings** for API keys and local endpoints.
+- 📤 **Exports** to Markdown, JSON, DOCX, and PDF when dependencies are available.
+- 🔌 **Provider routing** for local and cloud LLMs.
+- 🧪 **Local test file** to verify the project runs.
+
+---
+
+## 🎨 UX/UI Design
+
+**UX profile:** `Finance Ops Console`
+
+**Workflow layout:** Document intake → extraction → validation → approval/export
+
+**Empty state:** Upload a finance document or paste source text. The UI will keep live-data sections empty until real files/connectors are provided.
+
+### Main UI Components
+
+- Document intake panel
+- Extraction table
+- Validation ledger
+- Approval checklist
+- Export connector cards
+
+### Review / Workflow Lanes
+
+- Capture
+- Normalize
+- Validate
+- Approve
+- Export
+
+### Metrics Shown in the Interface
+
+- Extraction confidence
+- Validation issues
+- Approval readiness
+- Export completeness
+
+### Quick Actions
+
+- Validate totals
+- Check duplicates
+- Prepare accounting export
+- Flag human review
+
+---
+
+## 🧩 Project Inputs
+
+These are the main fields exposed by the GUI and `/api/run`. Required fields are enforced before execution.
+
+| Field | Type | Required | Default | Purpose |
+|---|---:|:---:|---|---|
+| `llm_usage`<br>LLM usage | text | Yes | — | Affects input: LLM usage. |
+| `work_brief`<br>Work brief / source text / URL / instructions | textarea | Yes | — | Paste the material, URL, description, or instruction needed for this project. |
+
+---
+
+## 🎛️ Customization
+
+This project is not a generic prompt box. The customization controls are connected to workflow behavior, validation, output shape, and export format.
+
+| Field | Type | Required | Default | Purpose |
+|---|---:|:---:|---|---|
+| `execution_mode`<br>Execution mode | select | No | Production | Controls strictness, depth, and output format for this project workflow. |
+| `currency`<br>currency | select | No | USD | Affects customization: currency. |
+| `provider_prices`<br>provider prices | text | No | — | Affects customization: provider prices. |
+| `markup`<br>markup | text | No | — | Affects customization: markup. |
+| `user_plans`<br>user plans | text | No | — | Affects customization: user plans. |
+| `quotas`<br>quotas | text | No | — | Affects customization: quotas. |
+| `alert_thresholds`<br>alert thresholds | slider | No | 50 | Affects customization: alert thresholds. |
+| `billing_cycle`<br>billing cycle | text | No | — | Affects customization: billing cycle. |
+| `output_format`<br>output format | select | No | Markdown | Affects customization: output format. |
+| `language`<br>language | select | No | English | Affects customization: language. |
+| `privacy_mode`<br>privacy mode | select | No | cloud allowed | Affects customization: privacy mode. |
+| `confidence_threshold`<br>Confidence threshold | slider | No | 75 | Items below this confidence are escalated to the human review queue. |
+
+### Select / Option Controls
+
+- **Execution mode**: Draft, Production, Audit / strict review, JSON/API output
+- **currency**: USD, EUR, GBP, EGP, AED, SAR, USDT
+- **output format**: Markdown, JSON, CSV, PDF, DOCX, XLSX
+- **language**: English, Arabic, Egyptian Arabic, French, German, Spanish
+- **privacy mode**: cloud allowed, local only, redact sensitive data
+
+---
+
+## 🧠 LLM Providers
+
+You can run the project with the local deterministic engine, or enhance the output with a configured LLM provider.
+
+### Supported Provider Types
+
+| Provider Type | Examples | Best For |
+|---|---|---|
+| Local OpenAI-compatible | Ollama, LM Studio, vLLM | Private files, offline/local workflows, cost control |
+| Cloud OpenAI-compatible | OpenAI, OpenRouter, custom gateway | General high-quality generation and structured output |
+| Anthropic | Claude models | Long-context reasoning and document-heavy workflows |
+| Google Gemini | Gemini models | Multimodal or Google ecosystem workflows |
+| Mistral | Mistral API | Fast European cloud models |
+| Azure OpenAI | Azure deployments | Enterprise-controlled cloud deployment |
+| AWS Bedrock | Bedrock-hosted models | AWS enterprise environments |
+
+### Recommended Model Usage
+
+| Use Case | Recommendation |
+|---|---|
+| Drafting | fast cloud or local instruct model |
+| Reasoning | strong reasoning model |
+| Private documents | local model via Ollama/LM Studio/vLLM |
+| Vision/PDF pages | vision-capable model when image pages are used |
+
+---
+
+## 🚀 Quick Start
+
+### 1) Clone or open this folder
 
 ```bash
-pip install llm-billing-engine
+cd llm-billing-engine
 ```
 
-```python
-from llm_billing import BillingEngine, CreditLedger
+### 2) Run on macOS / Linux / WSL
 
-engine = BillingEngine(database_url="postgresql://...")
-
-# Add credits to a user
-await engine.add_credits(user_id="usr_123", amount=1000, reason="subscription_renewal")
-
-# Before an AI call — reserve credits (prevents overspend)
-reservation = await engine.reserve(
-    user_id="usr_123",
-    estimated_tokens=5000,
-    cost_per_token=0.000003,
-    idempotency_key="req_abc123"
-)
-
-# After the AI call completes — settle with actual usage
-await engine.settle(
-    reservation_id=reservation.id,
-    actual_tokens=4823,
-)
-
-# If the call failed — release the reservation
-await engine.release(reservation_id=reservation.id)
-
-# Check balance (always computed from ledger, never stored)
-balance = await engine.get_balance(user_id="usr_123")
-print(f"Credits remaining: {balance.available}")
+```bash
+chmod +x run_gui.sh
+./run_gui.sh
 ```
 
-## How it works
+### 3) Run on Windows PowerShell
 
-```
-User balance = SUM(credits added) - SUM(credits settled) - SUM(credits reserved pending)
-```
-
-The balance is never stored — it's always computed from the immutable ledger. This means you can always audit exactly what happened and replay history.
-
-```
-add_credits(1000)     → ledger: +1000  | balance: 1000
-reserve(est=500)      → ledger: -500r  | balance: 500  (500 reserved)
-settle(actual=423)    → ledger: -423   | balance: 577  (77 returned from reserve)
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\run_gui_windows.ps1
 ```
 
-## Database schema
+### 4) Open the GUI
 
-```sql
--- Run once to set up
-SELECT llm_billing_setup();
+```text
+http://127.0.0.1:9133
 ```
 
-Creates:
-- `llm_credits_ledger` — immutable append-only ledger (DECIMAL(20,8))
-- `llm_reservations` — in-flight reservations with expiry
-- `llm_idempotency_keys` — prevents duplicate operations
+---
 
-## Configuration
+## 🛠️ Manual Installation
 
-```python
-engine = BillingEngine(
-    database_url="postgresql://user:pass@host/db",
-    reservation_ttl_seconds=300,    # Expire stuck reservations after 5 min
-    credit_precision=8,              # Decimal places (default: 8)
-    enable_audit_log=True,           # Log all operations (default: True)
-)
+Use this when you want full control instead of the run scripts.
+
+```bash
+cd llm-billing-engine
+python -m venv .venv
+source .venv/bin/activate      # Windows: .venv\Scripts\activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+cp .env.example .env           # Windows: copy .env.example .env
+uvicorn app.main:app --host 127.0.0.1 --port 9133
 ```
 
-## Supported model pricing presets
+---
 
-```python
-from llm_billing.presets import ModelPricing
+## 🔐 Environment Variables
 
-pricing = ModelPricing.GEMINI_25_FLASH   # $0.075 / 1M input tokens
-pricing = ModelPricing.CLAUDE_SONNET_4   # $3.00 / 1M input tokens
-pricing = ModelPricing.GPT4O             # $2.50 / 1M input tokens
+The project can be configured through the GUI settings screen or `.env`/environment variables.
 
-reservation = await engine.reserve(
-    user_id="usr_123",
-    estimated_tokens=5000,
-    pricing=ModelPricing.GEMINI_25_FLASH,
-)
+| Variable | Purpose |
+|---|---|
+| `AI_SUITE_HOST` | Host to bind the local app, usually `127.0.0.1`. |
+| `AI_SUITE_PORT` | Port for this project GUI, default `9133`. |
+| `AI_SUITE_DB` | SQLite database path for job history. |
+| `AI_SUITE_SECRET_KEY` | Secret used for local encryption/signing. Set this in production. |
+| `OPENAI_API_KEY` | Enables OpenAI-compatible cloud calls. |
+| `ANTHROPIC_API_KEY` | Enables Anthropic/Claude calls. |
+| `GEMINI_API_KEY` | Enables Google Gemini calls. |
+| `OPENROUTER_API_KEY` | Enables OpenRouter model routing. |
+| `MISTRAL_API_KEY` | Enables Mistral cloud models. |
+| `AZURE_OPENAI_ENDPOINT` | Azure OpenAI endpoint URL. |
+| `AZURE_OPENAI_API_KEY` | Azure OpenAI key. |
+| `AZURE_OPENAI_DEPLOYMENT` | Azure deployment name. |
+| `OLLAMA_BASE_URL` | Local Ollama OpenAI-compatible base URL. |
+| `LMSTUDIO_BASE_URL` | Local LM Studio OpenAI-compatible base URL. |
+| `VLLM_BASE_URL` | Local vLLM OpenAI-compatible base URL. |
+
+---
+
+## 🖥️ How to Use the GUI
+
+1. Open the local URL.
+2. Review the project purpose and workflow lanes.
+3. Fill the required input fields.
+4. Adjust only the project-related customization controls.
+5. Upload source files when needed.
+6. Choose `Rule Engine` for local deterministic output or select a configured LLM provider.
+7. Run the workflow.
+8. Review warnings, scorecards, and output sections.
+9. Export the result as Markdown, JSON, DOCX, or PDF.
+
+---
+
+## 🔄 Workflow
+
+- LLM usage
+- metering and billing
+
+### Analysis Modules
+
+- llm_usage_meter
+- invoice_calc
+- budget_guard
+
+### Output Sections
+
+- Usage table
+- Cost calculation
+- Budget alerts
+- Invoice lines
+
+### Scorecards
+
+- Input completeness
+- Domain fit
+- Risk level
+- Automation readiness
+- Export readiness
+
+---
+
+## 📤 Outputs & Exports
+
+- billing API
+- invoices
+- usage CSV
+- cost analytics
+
+The export system is designed for reviewable deliverables. For regulated or business-critical work, export drafts should be reviewed before sending to clients, customers, patients, employees, authorities, or production systems.
+
+---
+
+## 🔌 Real Integrations & Connector Policy
+
+Configured integrations in this standalone folder:
+
+- File upload
+- REST API
+- Export download
+- Job history
+- Stripe/accounting optional
+
+### Real Connector Requirements
+
+- Accounting/ERP connector for posting entries
+- tax/VAT rules source for jurisdiction-specific validation
+- human finance review before payment or filing
+
+**Important:** this project does not simulate live data. If a workflow needs live Shopify, ATS, ERP, tax, customs, medical, security, market, map, analytics, or repository data, it must be connected with valid credentials and real API access. Missing connectors should produce clear setup errors rather than invented results.
+
+---
+
+## 🧯 Guardrails
+
+- Show uncertainty and confidence
+- Cite evidence from input when possible
+- Human review required for legal, medical, financial, hiring, or security decisions
+- Do not invent facts absent from input
+
+Recommended operating rules:
+
+- ✅ Use local models for private or sensitive files.
+- ✅ Keep API keys out of Git.
+- ✅ Review low-confidence or high-impact outputs manually.
+- ✅ Keep source files and exported deliverables organized under `data/`.
+- ❌ Do not treat AI output as legal, medical, tax, hiring, trading, or security authority without expert review.
+
+---
+
+## 🧪 Testing
+
+Run the local smoke test:
+
+```bash
+python tests/test_single_project.py
 ```
 
-## FastAPI integration
+Run a health check after starting the server:
 
-```python
-from llm_billing.integrations.fastapi import BillingMiddleware
-
-app.add_middleware(BillingMiddleware, engine=engine, header="X-User-Id")
+```bash
+curl http://127.0.0.1:9133/api/health
 ```
 
-Automatically checks balance before routes tagged with `@requires_credits(estimated=1000)`.
+Expected result: the API returns `ok: true` and identifies this project.
 
-## License
+---
 
-MIT © [Alper Nabil Gabra Zakher](https://github.com/AlperNab)
+## 🧬 API Usage
+
+| Method | Endpoint | Use |
+|---|---|---|
+| `GET` | `/` | Opens the browser GUI. |
+| `GET` | `/api/health` | Health check for deployment and uptime monitoring. |
+| `GET` | `/api/projects` | Returns the local project configuration. |
+| `GET` | `/api/projects/{slug}` | Returns the project plugin metadata. |
+| `GET` | `/api/providers` | Lists configured providers and local/cloud options. |
+| `POST` | `/api/providers` | Saves provider settings/API keys. |
+| `POST` | `/api/upload` | Uploads source files for extraction or context. |
+| `POST` | `/api/run` | Runs the project workflow. |
+| `GET` | `/api/jobs` | Lists previous runs and job history. |
+| `GET` | `/api/jobs/{job_id}` | Reads one completed job. |
+| `GET` | `/api/jobs/{job_id}/export/{fmt}` | Exports a job as `md`, `json`, `docx`, or `pdf`. |
+| `GET` | `/api/project-local-status` | Verifies local project registration and implementation status. |
+
+### Minimal Run Request
+
+```bash
+curl -X POST http://127.0.0.1:9133/api/run \
+  -H "Content-Type: application/json" \
+  -d '{
+    "inputs": {
+      "work_brief": "Paste the source material or task details here"
+    },
+    "customization": {
+      "execution_mode": "Production"
+    },
+    "provider": "rule_engine"
+  }'
+```
+
+---
+
+## 📁 Folder Structure
+
+```text
+llm-billing-engine/
+├─ app/                         # FastAPI backend, schemas, DB, providers, exports
+├─ static/                      # Browser GUI assets
+├─ plugins/                     # Project plugin JSON metadata
+├─ data/                        # SQLite DB, uploads, exports
+├─ tests/                       # Smoke tests
+├─ project_config.json          # Project-specific inputs, controls, UX, workflow
+├─ PROJECT_IMPLEMENTATION.md    # Implementation details and domain notes
+├─ requirements.txt             # Python dependencies
+├─ run_gui.sh                   # macOS/Linux/WSL launcher
+├─ run_gui_windows.ps1          # Windows PowerShell launcher
+└─ README.md                    # This file
+```
+
+---
+
+## 🚢 Deployment Notes
+
+For local/private deployment, run with `uvicorn` behind a reverse proxy if needed. For production:
+
+- Set `AI_SUITE_SECRET_KEY`.
+- Use HTTPS.
+- Store provider keys in environment variables or a proper secret manager.
+- Restrict upload sizes and allowed file types.
+- Back up the SQLite database or move job storage to a managed database.
+- Add authentication before exposing beyond localhost.
+- Enable logging and monitoring.
+
+Example production-style command:
+
+```bash
+AI_SUITE_HOST=0.0.0.0 AI_SUITE_PORT=9133 uvicorn app.main:app --host 0.0.0.0 --port 9133
+```
+
+---
+
+## 🧯 Troubleshooting
+
+| Problem | Fix |
+|---|---|
+| `python` not found | Install Python 3.10+ and ensure it is on PATH. |
+| PowerShell blocks the script | Run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`. |
+| Port already in use | Set another port: `AI_SUITE_PORT=9200 ./run_gui.sh`. |
+| Provider fails | Verify API key, base URL, selected model, and account quota. |
+| Local model fails | Start Ollama/LM Studio/vLLM before running the workflow. |
+| PDF/DOCX export fails | Reinstall requirements and confirm optional export dependencies installed. |
+| Upload extraction is incomplete | Use cleaner source files or paste the important text into `work_brief`. |
+
+---
+
+## 🧭 Extension Points
+
+You can extend this project by editing:
+
+- `project_config.json` for inputs, settings, output sections, UX metadata, and workflow labels.
+- `plugins/llm-billing-engine.json` for plugin metadata.
+- `app/domain_engine.py` for deterministic business logic.
+- `app/llm_gateway.py` for provider integrations.
+- `static/app.js` and `static/styles.css` for GUI behavior and component design.
+- `tests/test_single_project.py` for stronger project-specific tests.
+
+---
+
+## ✅ Final Implementation Status
+
+| Area | Status |
+|---|---|
+| Standalone folder GUI | ✅ Implemented |
+| FastAPI backend | ✅ Implemented |
+| Project-specific config | ✅ Implemented |
+| Local deterministic workflow | ✅ Implemented |
+| Local/cloud LLM routing | ✅ Implemented |
+| Uploads and exports | ✅ Implemented |
+| Job history | ✅ Implemented |
+| Real external connectors | ⚠️ Requires valid credentials/API setup |
+| Fake/simulated live data | ❌ Not allowed |
+
+---
+
+## 📜 License
+
+Use the license included in this folder. If no explicit license is present, treat the code as private until you choose one.
